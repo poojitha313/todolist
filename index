@@ -1,45 +1,549 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My GitHub Page</title>
-  <style>
-    body {
-      background-color: #f7f7f7;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-      color: #333;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <title>React CRUD Todo App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Simple, clean styling -->
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
 
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #4f46e5, #06b6d4);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
 
-    button:hover {
-      background-color: #0056b3;
-    }
-  </style>
-</head>
-<body>
-  <h1>Hello, world!</h1>
-  <p>This website is hosted on GitHub Pages.</p>
+      .app {
+        background: #ffffff;
+        width: 100%;
+        max-width: 520px;
+        border-radius: 18px;
+        padding: 24px 22px 30px;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.3);
+        animation: fadeInApp 0.4s ease-out;
+      }
 
-  <button onclick="sayHello()">Click Me</button>
+      .title {
+        margin: 0;
+        text-align: center;
+        font-size: 1.9rem;
+        color: #0f172a;
+        letter-spacing: 0.02em;
+      }
 
-  <script>
-    function sayHello() {
-      alert("Hello from GitHub Pages!");
-      console.log("Button clicked!");
-    }
-  </script>
-</body>
+      .subtitle {
+        margin: 4px 0 18px;
+        text-align: center;
+        font-size: 0.85rem;
+        color: #6b7280;
+      }
+
+      .todo-form {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .todo-input {
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        outline: none;
+        font-size: 0.95rem;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        background: #f9fafb;
+      }
+
+      .todo-input:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        background: #ffffff;
+      }
+
+      .primary-btn {
+        padding: 0 18px;
+        border-radius: 999px;
+        border: none;
+        background: #4f46e5;
+        color: #ffffff;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        transition: background 0.15s, transform 0.05s, box-shadow 0.15s;
+        box-shadow: 0 10px 18px rgba(79, 70, 229, 0.35);
+      }
+
+      .primary-btn:hover {
+        background: #4338ca;
+        box-shadow: 0 12px 22px rgba(67, 56, 202, 0.45);
+      }
+
+      .primary-btn:active {
+        transform: translateY(1px);
+        box-shadow: 0 6px 14px rgba(79, 70, 229, 0.35);
+      }
+
+      .top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .filters {
+        display: inline-flex;
+        gap: 4px;
+        background: #f3f4f6;
+        border-radius: 999px;
+        padding: 3px;
+      }
+
+      .filter-btn {
+        border: none;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        color: #6b7280;
+        background: transparent;
+        transition: background 0.15s, color 0.15s;
+      }
+
+      .filter-btn:hover {
+        background: #e5e7eb;
+      }
+
+      .filter-btn.active {
+        background: #4f46e5;
+        color: #ffffff;
+      }
+
+      .counter {
+        font-size: 0.8rem;
+        color: #9ca3af;
+      }
+
+      .empty-text {
+        margin: 12px 2px 0;
+        font-size: 0.9rem;
+        color: #64748b;
+        text-align: center;
+      }
+
+      .todo-list {
+        list-style: none;
+        padding: 0;
+        margin: 6px 0 0;
+        max-height: 360px;
+        overflow-y: auto;
+      }
+
+      .todo-item {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 9px 11px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 8px;
+        transition: background 0.15s, box-shadow 0.15s, transform 0.05s, border-color 0.15s;
+        animation: fadeInUp 0.25s ease-out;
+        background: #ffffff;
+      }
+
+      .todo-item:hover {
+        background: #f8fafc;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+        transform: translateY(-1px);
+        border-color: #cbd5f5;
+      }
+
+      .todo-main {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        flex: 1;
+      }
+
+      .todo-text {
+        font-size: 0.95rem;
+        color: #0f172a;
+        word-break: break-word;
+      }
+
+      .todo-completed .todo-text {
+        text-decoration: line-through;
+        color: #94a3b8;
+      }
+
+      .meta {
+        font-size: 0.72rem;
+        color: #9ca3af;
+        margin-top: 2px;
+      }
+
+      .edit-input {
+        flex: 1;
+        padding: 6px 8px;
+        border-radius: 6px;
+        border: 1px solid #cbd5f5;
+        font-size: 0.9rem;
+        outline: none;
+      }
+
+      .edit-input:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.25);
+      }
+
+      .actions {
+        display: flex;
+        gap: 4px;
+        margin-left: 6px;
+      }
+
+      .small-btn {
+        border: none;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.15s, color 0.15s, transform 0.05s;
+      }
+
+      .small-btn:active {
+        transform: translateY(1px);
+      }
+
+      .edit-btn {
+        background: #e0f2fe;
+        color: #0369a1;
+      }
+
+      .edit-btn:hover {
+        background: #bae6fd;
+      }
+
+      .delete-btn {
+        background: #fee2e2;
+        color: #b91c1c;
+      }
+
+      .delete-btn:hover {
+        background: #fecaca;
+      }
+
+      .save-btn {
+        background: #bbf7d0;
+        color: #166534;
+      }
+
+      .save-btn:hover {
+        background: #86efac;
+      }
+
+      .cancel-btn {
+        background: #e5e7eb;
+        color: #374151;
+      }
+
+      .cancel-btn:hover {
+        background: #d1d5db;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInApp {
+        from {
+          opacity: 0;
+          transform: translateY(10px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+    </style>
+
+    <!-- React & Babel via CDN (no build tools needed) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useEffect } = React;
+
+      const STORAGE_KEY = "vinay_todos_v1";
+
+      function loadInitialTodos() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!stored) return [];
+          const parsed = JSON.parse(stored);
+          if (!Array.isArray(parsed)) return [];
+          return parsed;
+        } catch (e) {
+          console.error("Failed to load todos from localStorage", e);
+          return [];
+        }
+      }
+
+      function App() {
+        const [todos, setTodos] = useState(loadInitialTodos);
+        const [input, setInput] = useState("");
+        const [editingId, setEditingId] = useState(null);
+        const [editingText, setEditingText] = useState("");
+        const [filter, setFilter] = useState("all"); // all | completed | pending
+
+        // Persist todos in localStorage
+        useEffect(() => {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+          } catch (e) {
+            console.error("Failed to save todos to localStorage", e);
+          }
+        }, [todos]);
+
+        // CREATE
+        const handleAddTodo = (e) => {
+          e.preventDefault();
+          const text = input.trim();
+          if (!text) return;
+
+          const newTodo = {
+            id: Date.now(),
+            text,
+            completed: false,
+            createdAt: new Date().toISOString(),
+          };
+
+          setTodos((prev) => [newTodo, ...prev]);
+          setInput("");
+        };
+
+        // UPDATE: toggle completed
+        const toggleComplete = (id) => {
+          setTodos((prev) =>
+            prev.map((todo) =>
+              todo.id === id ? { ...todo, completed: !todo.completed } : todo
+            )
+          );
+        };
+
+        // DELETE
+        const deleteTodo = (id) => {
+          setTodos((prev) => prev.filter((todo) => todo.id !== id));
+        };
+
+        // START EDIT
+        const startEdit = (todo) => {
+          setEditingId(todo.id);
+          setEditingText(todo.text);
+        };
+
+        // CANCEL EDIT
+        const cancelEdit = () => {
+          setEditingId(null);
+          setEditingText("");
+        };
+
+        // SAVE EDIT (UPDATE)
+        const saveEdit = (id) => {
+          const text = editingText.trim();
+          if (!text) return;
+
+          setTodos((prev) =>
+            prev.map((todo) => (todo.id === id ? { ...todo, text } : todo))
+          );
+
+          setEditingId(null);
+          setEditingText("");
+        };
+
+        const filteredTodos = todos.filter((todo) => {
+          if (filter === "completed") return todo.completed;
+          if (filter === "pending") return !todo.completed;
+          return true;
+        });
+
+        const activeCount = todos.filter((t) => !t.completed).length;
+
+        const formatDateTime = (iso) => {
+          if (!iso) return "";
+          try {
+            return new Date(iso).toLocaleString();
+          } catch {
+            return "";
+          }
+        };
+
+        return (
+          <div className="app">
+            <h1 className="title">Todo List</h1>
+            <p className="subtitle">Simple CRUD app with filters and persistence</p>
+
+            <div className="top-row">
+              <div className="filters">
+                <button
+                  type="button"
+                  className={
+                    "filter-btn " + (filter === "all" ? "active" : "")
+                  }
+                  onClick={() => setFilter("all")}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  className={
+                    "filter-btn " + (filter === "completed" ? "active" : "")
+                  }
+                  onClick={() => setFilter("completed")}
+                >
+                  Completed
+                </button>
+                <button
+                  type="button"
+                  className={
+                    "filter-btn " + (filter === "pending" ? "active" : "")
+                  }
+                  onClick={() => setFilter("pending")}
+                >
+                  Pending
+                </button>
+              </div>
+              <span className="counter">
+                {activeCount === 0
+                  ? "All tasks done 🎉"
+                  : `${activeCount} pending`}
+              </span>
+            </div>
+
+            {/* CREATE */}
+            <form className="todo-form" onSubmit={handleAddTodo}>
+              <input
+                type="text"
+                placeholder="Add a new task..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className="todo-input"
+              />
+              <button type="submit" className="primary-btn">
+                Add
+              </button>
+            </form>
+
+            {/* READ */}
+            {filteredTodos.length === 0 ? (
+              <p className="empty-text">No tasks here. Try adding one!</p>
+            ) : (
+              <ul className="todo-list">
+                {filteredTodos.map((todo) => (
+                  <li
+                    key={todo.id}
+                    className={
+                      "todo-item " + (todo.completed ? "todo-completed" : "")
+                    }
+                  >
+                    <div className="todo-main">
+                      <input
+                        type="checkbox"
+                        checked={todo.completed}
+                        onChange={() => toggleComplete(todo.id)}
+                      />
+
+                      <div>
+                        {editingId === todo.id ? (
+                          <input
+                            className="edit-input"
+                            value={editingText}
+                            onChange={(e) => setEditingText(e.target.value)}
+                            autoFocus
+                          />
+                        ) : (
+                          <div>
+                            <span className="todo-text">{todo.text}</span>
+                            <div className="meta">
+                              Created: {formatDateTime(todo.createdAt)}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="actions">
+                      {editingId === todo.id ? (
+                        <>
+                          <button
+                            className="small-btn save-btn"
+                            type="button"
+                            onClick={() => saveEdit(todo.id)}
+                          >
+                            Save
+                          </button>
+                          <button
+                            className="small-btn cancel-btn"
+                            type="button"
+                            onClick={cancelEdit}
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            className="small-btn edit-btn"
+                            type="button"
+                            onClick={() => startEdit(todo)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="small-btn delete-btn"
+                            type="button"
+                            onClick={() => deleteTodo(todo.id)}
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+    </script>
+  </body>
 </html>
